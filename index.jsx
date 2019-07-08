@@ -44,7 +44,7 @@ const getBarStyle = batteryPercentage => {
   const borderSize = theme.borderSize + computeUsedBattery(batteryPercentage);
 
   return {
-    bottom: 0,
+    top: 0,
     right: borderSize,
     left: borderSize,
     position: "fixed",
