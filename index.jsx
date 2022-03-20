@@ -1,19 +1,10 @@
-// Update every second for the clock. Expensive elements should
-// throttle themselves
 export const refreshFrequency = 10000; // ms
-
-const USE_BASE_TEN = 10;
 
 const theme = {
   borderSize: 0,
   thickness: "2px",
-  green: "#80bc4f", // "#97c475"
-  green_threshold: 80,
-  yellow: "#e5c07b",
-  yellow_threshold: 55,
-  orange: "#d09a6a",
-  orange_threshold: 30,
-  red: "#e06c75",
+  green: [128, 188, 79],
+  red: [224, 108, 117],
   screenSize: window.innerWidth
 };
 
@@ -22,21 +13,28 @@ const computeUsedBattery = usedPercentage => {
   return theme.screenSize * (paddingPercent / 100);
 };
 const computeBatteryColor = level => {
-  const {
-    green,
-    green_threshold,
-    yellow,
-    yellow_threshold,
-    orange,
-    orange_threshold,
-    red
-  } = theme;
-
-  if (level > green_threshold) return green;
-  if (level > yellow_threshold) return yellow;
-  if (level > orange_threshold) return orange;
-  return theme.red;
+  const {green, red} = theme;
+  return colorMixer(green, red, level);
 };
+
+// https://stackoverflow.com/a/32171077
+//colorChannelA and colorChannelB are ints ranging from 0 to 255
+const colorChannelMixer = (colorChannelA, colorChannelB, amountToMix) => {
+  amountToMix /= 100;
+  var channelA = colorChannelA * amountToMix;
+  var channelB = colorChannelB * (1 - amountToMix);
+  return parseInt(channelA + channelB);
+}
+
+//rgbA and rgbB are arrays, amountToMix ranges from 0.0 to 1.0
+//example (red): rgbA = [255,0,0]
+const colorMixer = (rgbA, rgbB, amountToMix) => {
+  var r = colorChannelMixer(rgbA[0], rgbB[0], amountToMix);
+  var g = colorChannelMixer(rgbA[1], rgbB[1], amountToMix);
+  var b = colorChannelMixer(rgbA[2], rgbB[2], amountToMix);
+  console.log("rgb(" + r + "," + g + "," + b + ")");
+  return "rgb(" + r + "," + g + "," + b + ")";
+}
 
 const getBarStyle = batteryPercentage => {
   const height = theme.thickness;
@@ -44,7 +42,7 @@ const getBarStyle = batteryPercentage => {
   const borderSize = theme.borderSize + computeUsedBattery(batteryPercentage);
 
   return {
-    top: 0,
+    top: "32px",
     right: borderSize,
     left: borderSize,
     position: "fixed",
@@ -57,14 +55,11 @@ const getBarStyle = batteryPercentage => {
 export const command = `pmset -g batt | egrep '(\\d+)\%' -o | cut -f1 -d%`;
 
 export const render = ({ output, error }) => {
-  const batteryPercentage = parseInt(output, USE_BASE_TEN);
-
   if (error) {
-    console.log(new Date());
-    console.log(error);
-    console.log(String(error));
+    console.error(error);
   }
 
+  const batteryPercentage = parseInt(output);
   const barStyle = getBarStyle(batteryPercentage);
 
   return <div style={barStyle} />;
