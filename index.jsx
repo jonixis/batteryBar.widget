@@ -32,7 +32,6 @@ const colorMixer = (rgbA, rgbB, amountToMix) => {
   var r = colorChannelMixer(rgbA[0], rgbB[0], amountToMix);
   var g = colorChannelMixer(rgbA[1], rgbB[1], amountToMix);
   var b = colorChannelMixer(rgbA[2], rgbB[2], amountToMix);
-  console.log("rgb(" + r + "," + g + "," + b + ")");
   return "rgb(" + r + "," + g + "," + b + ")";
 }
 
